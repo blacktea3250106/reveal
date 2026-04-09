@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScoreMap - Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN SYSTEM ===== */
+:root {
+  --bg: #F8F9FA;
+  --card: #FFFFFF;
+  --primary: #4F46E5;
+  --primary-light: #EEF2FF;
+  --primary-hover: #4338CA;
+  --success: #059669;
+  --success-light: #F0FDF4;
+  --warning: #D97706;
+  --warning-light: #FFFBEB;
+  --danger: #DC2626;
+  --text: #1F2937;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --border: #E5E7EB;
+  --border-light: #F3F4F6;
+  --nav-bg: rgba(255,255,255,0.85);
+  --shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.dark {
+  --bg: #0F172A;
+  --card: #1E293B;
+  --primary: #818CF8;
+  --primary-light: #1E1B4B;
+  --primary-hover: #A5B4FC;
+  --success: #34D399;
+  --success-light: #064E3B;
+  --warning: #FBBF24;
+  --warning-light: #78350F;
+  --danger: #F87171;
+  --text: #E2E8F0;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --border: #334155;
+  --border-light: #1E293B;
+  --nav-bg: rgba(15,23,42,0.85);
+  --shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', 'Noto Sans TC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== UTILITIES ===== */
+.container { max-width: 480px; margin: 0 auto; padding: 0 20px; }
+.container-wide { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.btn-primary {
+  display: block; width: 100%; padding: 16px;
+  background: var(--primary); color: #fff;
+  border: none; border-radius: 12px;
+  font-size: 16px; font-weight: 600;
+  cursor: pointer; text-align: center;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.btn-primary:hover { background: var(--primary-hover); }
+
+.btn-secondary {
+  display: block; width: 100%; padding: 14px;
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border); border-radius: 12px;
+  font-size: 15px; font-weight: 500;
+  cursor: pointer; text-align: center;
+  text-decoration: none;
+}
+
+.text-5xl { font-size: 48px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.text-3xl { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.text-2xl { font-size: 24px; font-weight: 600; }
+.text-lg { font-size: 18px; font-weight: 600; }
+.text-sm { font-size: 14px; }
+.text-xs { font-size: 12px; }
+.text-muted { color: var(--text-secondary); }
+.text-faint { color: var(--text-muted); }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-warning { color: var(--warning); }
+.text-primary { color: var(--primary); }
+.text-center { text-align: center; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.mt-6 { margin-top: 24px; }
+.mt-8 { margin-top: 32px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+.gap-4 { gap: 16px; }
+.gap-3 { gap: 12px; }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+
+.hidden { display: none !important; }
+
+/* ===== PROGRESS BAR ===== */
+.progress-track {
+  width: 100%; height: 8px;
+  background: var(--border);
+  border-radius: 999px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 999px;
+  background: var(--primary);
+  transition: width 1s ease-out;
+}
+.progress-fill.success { background: var(--success); }
+
+/* ===== NAV ===== */
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+}
+.top-nav .inner {
+  max-width: 480px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.top-nav .logo { font-size: 18px; font-weight: 700; color: var(--primary); }
+.top-nav .nav-actions { display: flex; gap: 12px; align-items: center; }
+.top-nav .nav-btn {
+  background: none; border: none; color: var(--text-secondary);
+  font-size: 13px; cursor: pointer; padding: 6px 10px; border-radius: 8px;
+}
+.top-nav .nav-btn:hover { background: var(--border-light); }
+
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+}
+.bottom-nav .inner {
+  max-width: 480px; margin: 0 auto;
+  display: flex; justify-content: space-around;
+}
+.bottom-nav .tab {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px; font-size: 11px; color: var(--text-muted);
+  cursor: pointer; padding: 4px 12px; border-radius: 8px;
+  background: none; border: none;
+  transition: color 0.2s;
+}
+.bottom-nav .tab.active { color: var(--primary); }
+.bottom-nav .tab svg { width: 22px; height: 22px; }
+
+/* ===== PAGE NAV ===== */
+.page-nav {
+  display: flex; gap: 4px; padding: 12px 20px; overflow-x: auto;
+  max-width: 480px; margin: 0 auto;
+}
+.page-nav button {
+  padding: 6px 14px; border-radius: 8px; border: none;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  white-space: nowrap;
+  background: transparent; color: var(--text-secondary);
+}
+.page-nav button.active {
+  background: var(--primary); color: #fff;
+}
+
+/* ===== SCREENS ===== */
+.screen { display: none; padding-bottom: 100px; }
+.screen.active { display: block; }
+
+/* ===== LANDING ===== */
+.landing-hero {
+  text-align: center;
+  padding: 60px 20px 40px;
+}
+.landing-hero h1 {
+  font-size: 28px; font-weight: 700; line-height: 1.4;
+  margin-bottom: 12px;
+}
+.landing-hero p { color: var(--text-secondary); font-size: 16px; margin-bottom: 32px; }
+
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+.stat-item { text-align: center; padding: 16px 8px; }
+.stat-item .num { font-size: 24px; font-weight: 700; }
+.stat-item .label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.compare-card { padding: 20px; border-radius: 12px; }
+.compare-card.negative { background: var(--border-light); }
+.compare-card.positive { background: var(--primary-light); }
+.compare-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.compare-card ul { list-style: none; font-size: 13px; }
+.compare-card li { padding: 4px 0; }
+
+.testimonial {
+  border-left: 3px solid var(--primary);
+  padding: 12px 16px; margin: 8px 0;
+  font-size: 14px;
+}
+.testimonial .meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* ===== DIAGNOSIS ===== */
+.quiz-header {
+  padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.quiz-header .close-btn {
+  background: none; border: none; font-size: 20px;
+  color: var(--text-muted); cursor: pointer;
+}
+.quiz-progress { padding: 0 20px 16px; }
+
+.quiz-body { padding: 20px; max-width: 480px; margin: 0 auto; }
+.quiz-question {
+  font-size: 17px; font-weight: 500; line-height: 1.7;
+  margin-bottom: 24px;
+}
+.quiz-options { display: flex; flex-direction: column; gap: 10px; }
+.quiz-option {
+  padding: 16px 18px; border: 1.5px solid var(--border);
+  border-radius: 12px; cursor: pointer; font-size: 15px;
+  transition: all 0.15s; background: var(--card);
+}
+.quiz-option:hover { border-color: var(--primary); background: var(--primary-light); }
+.quiz-option.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 500; }
+.quiz-option.correct { border-color: var(--success); background: var(--success-light); }
+.quiz-option.wrong { border-color: var(--danger); background: #FEF2F2; }
+.dark .quiz-option.wrong { background: #450a0a; }
+
+.quiz-realtime {
+  margin-top: 24px; padding: 16px;
+  background: var(--primary-light);
+  border-radius: 12px; text-align: center;
+}
+
+.explanation-card {
+  margin-top: 20px; padding: 20px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* ===== REPORT ===== */
+.report-score {
+  text-align: center; padding: 40px 20px;
+}
+.report-score .number {
+  font-size: 64px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  line-height: 1;
+}
+
+.report-section {
+  padding: 24px 0;
+  border-top: 2px solid var(--border);
+}
+.report-section h2 {
+  font-size: 18px; font-weight: 600; margin-bottom: 16px;
+}
+
+.ability-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 0; font-size: 14px;
+}
+.ability-row .label { width: 140px; flex-shrink: 0; }
+.ability-row .bar-wrap { flex: 1; }
+.ability-row .pct { width: 40px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.ability-row .note { width: 80px; font-size: 12px; color: var(--text-muted); text-align: right; }
+
+/* ===== DASHBOARD ===== */
+.score-hero {
+  text-align: center; padding: 32px 24px;
+}
+.score-hero .label { font-size: 14px; color: var(--text-secondary); }
+.score-hero .score { font-size: 56px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.score-hero .change { font-size: 14px; font-weight: 500; margin-top: 4px; }
+.score-hero .prediction {
+  margin-top: 16px; padding: 8px 16px;
+  background: var(--success-light);
+  border-radius: 8px; font-size: 13px;
+  color: var(--success); display: inline-block;
+}
+
+.progress-labels {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--text-muted); margin-top: 6px;
+}
+
+.task-list { display: flex; flex-direction: column; }
+.task-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.task-item:last-child { border-bottom: none; }
+.task-info h4 { font-size: 15px; font-weight: 500; }
+.task-info p { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.task-info .reason { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.task-arrow {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--primary-light); color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0; cursor: pointer;
+  border: none;
+}
+
+.week-streak {
+  display: flex; justify-content: space-between; padding: 4px 0;
+}
+.week-day { text-align: center; font-size: 12px; }
+.week-day .dot {
+  width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 4px auto 2px; font-size: 14px;
+}
+.week-day .dot.done { background: var(--success-light); color: var(--success); }
+.week-day .dot.today { background: var(--primary); color: #fff; }
+.week-day .dot.future { background: var(--border-light); color: var(--text-muted); }
+.week-day .label { color: var(--text-muted); }
+.week-day .pts { font-size: 11px; color: var(--success); font-weight: 500; }
+
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-header h3 { font-size: 16px; font-weight: 600; }
+.section-header .extra { font-size: 13px; color: var(--text-muted); }
+
+/* ===== QUIZ FLOW ===== */
+.quiz-result-hero { text-align: center; padding: 40px 20px 24px; }
+.quiz-result-hero .title { font-size: 18px; color: var(--text-secondary); }
+.quiz-result-hero .fraction { font-size: 40px; font-weight: 700; margin-top: 8px; }
+
+.mastery-change {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0;
+}
+.mastery-change .label { font-size: 14px; color: var(--text-secondary); }
+.mastery-change .values { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.pattern-card {
+  padding: 16px;
+  background: var(--warning-light);
+  border-left: 4px solid var(--warning);
+  border-radius: 0 12px 12px 0;
+}
+
+/* ===== ANALYSIS ===== */
+.chart-placeholder {
+  width: 100%; height: 180px;
+  background: var(--border-light);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); font-size: 14px;
+  position: relative; overflow: hidden;
+}
+.chart-line {
+  position: absolute; bottom: 20px; left: 20px; right: 20px;
+  height: 120px;
+}
+.chart-line svg { width: 100%; height: 100%; }
+
+.ai-report {
+  padding: 20px;
+  background: var(--primary-light);
+  border-radius: 12px;
+}
+.ai-report h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.ai-report p { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+
+.alert-card {
+  padding: 16px;
+  border-left: 4px solid var(--warning);
+  background: var(--warning-light);
+  border-radius: 0 12px 12px 0;
+  font-size: 14px;
+}
+.alert-card.danger {
+  border-left-color: var(--danger);
+  background: #FEF2F2;
+}
+.dark .alert-card.danger { background: #450a0a; }
+
+/* ===== MISTAKES ===== */
+.filter-tabs {
+  display: flex; gap: 8px; margin-bottom: 20px;
+}
+.filter-tab {
+  padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--card); font-size: 13px; cursor: pointer;
+  color: var(--text-secondary);
+}
+.filter-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.mistake-group { margin-bottom: 12px; }
+.mistake-group .group-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px;
+}
+.mistake-group h4 { font-size: 15px; font-weight: 500; }
+.mistake-group .desc { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.mistake-group .practice-btn {
+  padding: 8px 16px; border-radius: 8px;
+  background: var(--primary-light); color: var(--primary);
+  font-size: 13px; font-weight: 500;
+  border: none; cursor: pointer;
+}
+
+.cram-card {
+  background: var(--primary-light);
+  border-radius: 16px; padding: 24px;
+  text-align: center;
+}
+.cram-card .star { font-size: 28px; margin-bottom: 8px; }
+.cram-card h3 { font-size: 18px; font-weight: 600; }
+.cram-card p { font-size: 14px; color: var(--text-secondary); margin-top: 8px; }
+
+/* ===== ADMIN ===== */
+.admin-stats {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+}
+.admin-stat { text-align: center; padding: 16px; }
+.admin-stat .num { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.admin-stat .label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.student-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 14px;
+}
+.student-row:last-child { border-bottom: none; }
+.student-name { font-weight: 500; width: 70px; }
+.student-score { font-variant-numeric: tabular-nums; font-weight: 600; width: 45px; }
+.student-trend { width: 50px; font-size: 13px; font-weight: 500; }
+.student-status { font-size: 12px; }
+.badge {
+  padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500;
+}
+.badge-success { background: var(--success-light); color: var(--success); }
+.badge-warning { background: var(--warning-light); color: var(--warning); }
+.badge-danger { background: #FEF2F2; color: var(--danger); }
+.dark .badge-danger { background: #450a0a; }
+
+/* ===== PRICING ===== */
+.pricing-grid { display: flex; flex-direction: column; gap: 16px; }
+.pricing-card { position: relative; }
+.pricing-card.featured { border-color: var(--primary); border-width: 2px; }
+.pricing-card .badge-featured {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--primary); color: #fff; padding: 4px 12px;
+  border-radius: 6px; font-size: 12px; font-weight: 600;
+}
+.pricing-card .price { font-size: 36px; font-weight: 700; margin: 8px 0; }
+.pricing-card .price .period { font-size: 16px; font-weight: 400; color: var(--text-muted); }
+.pricing-card .features { list-style: none; margin: 16px 0; }
+.pricing-card .features li {
+  padding: 6px 0; font-size: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.pricing-card .features li::before { content: "✓"; color: var(--success); font-weight: 600; }
+
+/* ===== DARK MODE TOGGLE ===== */
+.theme-toggle {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--border-light); border: none;
+  cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in {
+  animation: slideUp 0.5s ease-out forwards;
+}
+.animate-fade {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+.animate-count {
+  animation: countUp 0.8s ease-out forwards;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (min-width: 640px) {
+  .container { max-width: 480px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== TOP NAV ===== -->
+<nav class="top-nav">
+  <div class="inner">
+    <div class="logo">ScoreMap</div>
+    <div class="nav-actions">
+      <button class="theme-toggle" onclick="toggleDark()" id="themeBtn">🌙</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== PAGE NAV ===== -->
+<div class="page-nav" id="pageNav">
+  <button class="active" onclick="showScreen('landing')">Landing</button>
+  <button onclick="showScreen('diagnosis')">診斷測驗</button>
+  <button onclick="showScreen('report')">診斷報告</button>
+  <button onclick="showScreen('dashboard')">Dashboard</button>
+  <button onclick="showScreen('quiz')">做題</button>
+  <button onclick="showScreen('result')">做完題</button>
+  <button onclick="showScreen('analysis')">分析</button>
+  <button onclick="showScreen('mistakes')">錯題本</button>
+  <button onclick="showScreen('admin')">補習班</button>
+  <button onclick="showScreen('pricing')">方案</button>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN: LANDING -->
+<!-- ========================================== -->
+<div class="screen active" id="screen-landing">
+  <div class="container">
+
+    <div class="landing-hero">
+      <h1>你的多益目標分數<br>幾天可以到？</h1>
+      <p>免費測驗，3 分鐘告訴你</p>
+      <button class="btn-primary" onclick="showScreen('diagnosis')">開始免費診斷 →</button>
+    </div>
+
+    <div class="card mt-8">
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="num" id="statUsers">12,847</div>
+          <div class="label">位用戶</div>
+        </div>
+        <div class="stat-item">
+          <div class="num text-success">94</div>
+          <div class="label">平均提升分數</div>
+        </div>
+        <div class="stat-item">
+          <div class="num">91%</div>
+          <div class="label">達標率</div>
+        </div>
+      </div>
+      <p class="text-xs text-faint text-center mt-2">即時平台數據，非行銷話術</p>
+    </div>
+
+    <div class="mt-8">
+      <div class="section-header">
+        <h3>最近達標</h3>
+      </div>
+      <div class="testimonial">
+        「目標 750，考了 780」
+        <div class="meta">使用 52 天 · 起始分數 620</div>
+      </div>
+      <div class="testimonial">
+        「目標 800，考了 815」
+        <div class="meta">使用 38 天 · 起始分數 680</div>
+      </div>
+      <div class="testimonial">
+        「目標 650，考了 700」
+        <div class="meta">使用 61 天 · 起始分數 510</div>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <div class="section-header">
+        <h3>為什麼不直接用 ChatGPT？</h3>
+      </div>
+      <div class="compare-grid">
+        <div class="compare-card negative">
+          <h3>ChatGPT</h3>
+          <ul>
+            <li>✕ 不知道自己幾分</li>
+            <li>✕ 不知道該練什麼</li>
+            <li>✕ 沒有進度追蹤</li>
+            <li>✕ 每次要想 prompt</li>
+            <li>✕ 不知道來不來得及</li>
+          </ul>
+        </div>
+        <div class="compare-card positive">
+          <h3>ScoreMap</h3>
+          <ul>
+            <li>✓ 即時預估分數</li>
+            <li>✓ 每天計畫排好</li>
+            <li>✓ 看得到每天進步</li>
+            <li>✓ 打開就練</li>
+            <li>✓ 預測達標日期</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 mb-6">
+      <button class="btn-primary" onclick="showScreen('diagnosis')">免費診斷，現在就開始 →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN: DIAGNOSIS -->
+<!-- ========================================== -->
+<div class="screen" id="screen-diagnosis">
+  <div class="container">
+
+    <div class="quiz-header">
+      <button class="close-btn" onclick="showScreen('landing')">✕</button>
+      <span class="text-sm text-muted">4 / 20</span>
+      <span class="text-sm text-muted">⏱ 02:18</span>
+    </div>
+
+    <div class="quiz-progress" style="padding: 0 0 16px;">
+      <div class="progress-track">
+        <div class="progress-fill" style="width: 20%;"></div>
+      </div>
+    </div>
+
+    <div class="quiz-body" style="padding: 0;">
+      <div class="quiz-question">
+        The company's annual report _____ to all shareholders last Friday.
+      </div>
+
+      <div class="quiz-options">
+        <div class="quiz-option" onclick="selectOption(this)">A. was distributed</div>
+        <div class="quiz-option" onclick="selectOption(this)">B. distributed</div>
+        <div class="quiz-option" onclick="selectOption(this)">C. has distributed</div>
+        <div class="quiz-option" onclick="selectOption(this)">D. distributing</div>
+      </div>
+
+      <div class="quiz-realtime mt-6">
+        <div class="text-xs text-muted">即時分析中...</div>
+        <div class="text-lg mt-1" style="color: var(--primary);">預估範圍：580 - 660</div>
+        <div class="progress-track mt-2">
+          <div class="progress-fill" style="width: 45%;"></div>
+        </div>
+        <div class="text-xs text-muted mt-1">正在收斂</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN: REPORT -->
+<!-- ========================================== -->
+<div class="screen" id="screen-report">
+  <div class="container">
+
+    <div class="report-score animate-in">
+      <div class="text-sm text-muted">你的預估分數</div>
+      <div class="number mt-2" id="reportScore">615</div>
+      <div class="mt-4">
+        <div class="flex items-center justify-center gap-3 text-sm">
+          <span class="text-muted">615</span>
+          <div style="flex:1; max-width: 200px;">
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 18%;"></div>
+            </div>
+          </div>
+          <span class="font-semibold">800</span>
+        </div>
+        <div class="text-xs text-muted text-center mt-1">差距 185 分，以你的弱項分佈可以補</div>
+      </div>
+    </div>
+
+    <div class="report-section animate-in" style="animation-delay: 0.2s;">
+      <h2>能力拆解</h2>
+
+      <div class="text-xs text-muted mb-2 font-semibold">聽力</div>
+      <div class="ability-row">
+        <div class="label">Part 1 圖片描述</div>
+        <div class="bar-wrap"><div class="progress-track"><div class="progress-fill success" style="width:82%"></div></div></div>
+        <div class="pct">82%</div>
+        <div class="note text-faint">不用花時間</div>
+      </div>
+      <div class="ability-row">
+        <div class="label">Part 2 應答問題</div>
+        <div class="bar-wrap"><div class="progress-track"><div class="progress-fill" style="width:65%"></div></div></div>
+        <div class="pct">65%</div>
+        <div class="note text-faint">可以拉分</div>
+      </div>
+      <div class="ability-row">
+        <div class="label">Part 3 長對話</div>
+        <div class="bar-wrap"><div class="progress-track"><div class="progress-fill" style="width:38%; background: var(--danger);"></div></div></div>
+        <div class="pct text-danger">38%</div>
+        <div class="note text-danger font-medium">最大破口</div>
+      </div>
+      <div class="ability-row">
+        <div class="label">Part 4 獨白</div>
+        <div class="bar-wrap"><div class="progress-track"><div class="progress-fill" style="width:52%"></div></div></div>
+        <div class="pct">52%</div>
+        <div class="note text-faint">需要加強</div>
+      </div>
+
+      <div class="text-xs text-muted mb-2 font-semibold mt-4">閱讀</div>
+      <div class="ability-row">
+        <div class="label">Part 5 文法填空</div>
+        <div class="bar-wrap"><div class="progress-track"><div class="progress-fill" style="width:55%"></div></div></div>
+        <div class="pct">55%</div>
+        <div class="note text-success font-medium">可快速拉分</div>
+      </div>
+      <div class="ability-row">
+        <div class="label">Part 6 段落填空</div>
+        <div class="bar-wrap"><div class="progress-track"><div class="progress-fill" style="width:68%"></div></div></div>
+        <div class="pct">68%</div>
+        <div class="note text-faint">還行</div>
+      </div>
+      <div class="ability-row">
+        <div class="label">Part 7 閱讀理解</div>
+        <div class="bar-wrap"><div class="progress-track"><div class="progress-fill" style="width:58%"></div></div></div>
+        <div class="pct">58%</div>
+        <div class="note text-faint">需要練速度</div>
+      </div>
+    </div>
+
+    <div class="report-section animate-in" style="animation-delay: 0.4s;">
+      <h2>提分路線圖</h2>
+      <div class="chart-placeholder">
+        <svg viewBox="0 0 300 120" style="width:85%; height: 85%;">
+          <line x1="0" y1="110" x2="300" y2="110" stroke="var(--border)" stroke-width="1"/>
+          <line x1="0" y1="15" x2="300" y2="15" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+          <text x="0" y="12" fill="var(--text-muted)" font-size="9">800</text>
+          <text x="0" y="108" fill="var(--text-muted)" font-size="9">615</text>
+          <path d="M 10 100 Q 80 80, 120 65 T 200 35 T 290 15" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="10" cy="100" r="4" fill="var(--primary)"/>
+          <circle cx="290" cy="15" r="4" fill="var(--success)"/>
+          <text x="50" y="95" fill="var(--text-muted)" font-size="8">文法基礎</text>
+          <text x="140" y="55" fill="var(--text-muted)" font-size="8">閱讀+聽力</text>
+          <text x="240" y="30" fill="var(--text-muted)" font-size="8">模考</text>
+        </svg>
+      </div>
+      <div class="text-center mt-3">
+        <div class="text-sm font-medium">預計第 52 天達到 800</div>
+        <div class="text-sm text-success mt-1">你的考試在第 65 天 → ✅ 來得及</div>
+      </div>
+    </div>
+
+    <div class="report-section animate-in" style="animation-delay: 0.6s;">
+      <h2>跟你程度相似的用戶</h2>
+      <div class="card mt-2" style="padding: 16px;">
+        <div class="text-sm">起始 600-650 分的用戶中：</div>
+        <div class="mt-2 text-sm" style="line-height: 2;">
+          → <strong>89%</strong> 在 60 天內達到目標<br>
+          → 平均提升 <strong>142</strong> 分<br>
+          → 最快紀錄：<strong>28</strong> 天提升 190 分
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 mb-4 animate-in" style="animation-delay: 0.8s;">
+      <button class="btn-primary" onclick="showScreen('dashboard')">開始我的衝刺計畫 →</button>
+      <div class="text-xs text-muted text-center mt-2">免費試用 7 天，不需要信用卡</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN: DASHBOARD -->
+<!-- ========================================== -->
+<div class="screen" id="screen-dashboard">
+  <div class="container">
+
+    <div class="flex items-center justify-between mt-4 mb-4">
+      <div class="text-sm text-muted">距離考試還有</div>
+      <div class="text-sm font-semibold">D-58</div>
+    </div>
+
+    <div class="card score-hero">
+      <div class="label">預估分數</div>
+      <div class="score" id="dashScore">648</div>
+      <div class="change text-success">昨天 641（+7）</div>
+
+      <div class="mt-4" style="padding: 0 8px;">
+        <div class="progress-track">
+          <div class="progress-fill" style="width: 18%;"></div>
+        </div>
+        <div class="progress-labels">
+          <span>615 起點</span>
+          <span>648 你在這</span>
+          <span>800 目標</span>
+        </div>
+      </div>
+
+      <div class="prediction">
+        ✅ 按目前速度，預計 Day 52 達標，比預期快 6 天
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <div class="section-header">
+        <h3>今天的計畫</h3>
+        <div class="extra">約 35 分鐘</div>
+      </div>
+
+      <div class="card" style="padding: 0;">
+        <div class="task-list" style="padding: 4px 20px;">
+          <div class="task-item">
+            <div class="task-info">
+              <h4>聽力 Part 3 長對話</h4>
+              <p>12 題 · 約 15 分鐘</p>
+              <div class="reason">昨天這部分錯 4 題，今天針對加強</div>
+            </div>
+            <button class="task-arrow" onclick="showScreen('quiz')">→</button>
+          </div>
+          <div class="task-item">
+            <div class="task-info">
+              <h4>文法 — 時態綜合</h4>
+              <p>10 題 · 約 8 分鐘</p>
+              <div class="reason">掌握度 72%，再鞏固一下</div>
+            </div>
+            <button class="task-arrow">→</button>
+          </div>
+          <div class="task-item">
+            <div class="task-info">
+              <h4>昨日錯題複習</h4>
+              <p>6 題 · 約 5 分鐘</p>
+              <div class="reason">間隔一天再做一次，加深記憶</div>
+            </div>
+            <button class="task-arrow">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <div class="section-header">
+        <h3>本週</h3>
+        <div class="extra text-success font-medium">+27 分 · 連續 3 天</div>
+      </div>
+
+      <div class="card">
+        <div class="week-streak">
+          <div class="week-day">
+            <div class="label">一</div>
+            <div class="dot done">✓</div>
+            <div class="pts">+12</div>
+          </div>
+          <div class="week-day">
+            <div class="label">二</div>
+            <div class="dot done">✓</div>
+            <div class="pts">+8</div>
+          </div>
+          <div class="week-day">
+            <div class="label">三</div>
+            <div class="dot done">✓</div>
+            <div class="pts">+7</div>
+          </div>
+          <div class="week-day">
+            <div class="label">四</div>
+            <div class="dot today">●</div>
+            <div class="pts" style="color: var(--primary);">今天</div>
+          </div>
+          <div class="week-day">
+            <div class="label">五</div>
+            <div class="dot future">○</div>
+            <div class="pts">&nbsp;</div>
+          </div>
+          <div class="week-day">
+            <div class="label">六</div>
+            <div class="dot future">○</div>
+            <div class="pts">&nbsp;</div>
+          </div>
+          <div class="week-day">
+            <div class="label">日</div>
+            <div class="dot future">○</div>
+            <div class="pts">&nbsp;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="inner">
+      <button class="tab active" onclick="showScreen('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        首頁
+      </button>
+      <button class="tab" onclick="showScreen('analysis')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        分析
+      </button>
+      <button class="tab" onclick="showScreen('quiz')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        模考
+      </button>
+      <button class="tab" onclick="showScreen('mistakes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        錯題
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN: QUIZ (做題) -->
+<!-- ========================================== -->
+<div class="screen" id="screen-quiz">
+  <div class="container">
+
+    <div class="quiz-header">
+      <button class="close-btn" onclick="showScreen('dashboard')">✕</button>
+      <span class="text-sm font-medium">聽力 Part 3</span>
+      <span class="text-sm text-muted">7 / 12 &nbsp; ⏱ 08:32</span>
+    </div>
+
+    <div style="padding: 0 0 16px;">
+      <div class="progress-track">
+        <div class="progress-fill" style="width: 58%;"></div>
+      </div>
+    </div>
+
+    <!-- Audio player mock -->
+    <div class="card mt-2" style="padding: 16px; text-align: center;">
+      <div class="text-xs text-muted mb-2">🔊 播放對話</div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width: 65%; background: var(--text-muted);"></div>
+      </div>
+      <div class="flex justify-between mt-1">
+        <span class="text-xs text-faint">1:23</span>
+        <span class="text-xs text-faint">2:01</span>
+      </div>
+    </div>
+
+    <div class="quiz-question mt-4">
+      What does the woman suggest?
+    </div>
+
+    <div class="quiz-options">
+      <div class="quiz-option">A. Rescheduling the meeting</div>
+      <div class="quiz-option wrong" style="cursor:default;">
+        B. Hiring additional staff
+        <span class="text-xs text-danger" style="float:right;">← 你選的</span>
+      </div>
+      <div class="quiz-option correct" style="cursor:default;">
+        C. Extending the deadline
+        <span class="text-xs text-success" style="float:right;">✓ 正確</span>
+      </div>
+      <div class="quiz-option">D. Canceling the project</div>
+    </div>
+
+    <div class="explanation-card mt-4">
+      <div class="text-sm font-semibold text-danger mb-2">✕ 答錯了</div>
+      <div class="text-sm" style="line-height: 1.8;">
+        你選了 B（Hiring additional staff）<br><br>
+        對話中女方說的是 <strong>"push back the due date"</strong><br>
+        這是「延後截止日」的意思，對應 C<br><br>
+        <span class="text-muted">你的問題：</span><br>
+        把 "push back" 誤解為「推進」<br>
+        push back = 延後 ≠ push forward<br><br>
+        <span class="text-muted">💡 類似片語：</span><br>
+        put off = 延後<br>
+        hold off = 暫緩
+      </div>
+      <button class="btn-secondary mt-3" style="width: auto; display: inline-block; padding: 8px 16px;">🔊 重聽關鍵句</button>
+    </div>
+
+    <div class="mt-4">
+      <button class="btn-primary" onclick="showScreen('result')">下一題 →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN: RESULT (做完題) -->
+<!-- ========================================== -->
+<div class="screen" id="screen-result">
+  <div class="container">
+
+    <div class="quiz-result-hero">
+      <div class="title">聽力 Part 3 · 完成</div>
+      <div class="fraction animate-count">9 / 12</div>
+    </div>
+
+    <div class="card animate-in">
+      <div class="mastery-change">
+        <div class="label">聽力 Part 3 掌握度</div>
+        <div class="values">38% → <span class="text-primary">51%</span></div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="masteryBar" style="width: 0%;"></div>
+      </div>
+      <div class="progress-labels">
+        <span>診斷時</span>
+        <span>現在</span>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-light);">
+        <div class="mastery-change">
+          <div class="label">預估分數</div>
+          <div class="values">648 → <span class="text-primary">653</span> <span class="text-success text-xs font-medium">(+5)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-4 animate-in" style="animation-delay: 0.3s;">
+      <div class="pattern-card">
+        <div class="text-sm font-semibold" style="color: var(--warning);">你錯的 3 題有共同模式</div>
+        <div class="text-sm mt-2">
+          都是<strong>「語意轉換」</strong>題型<br>
+          <span class="text-muted">對話用 A 說法，選項換成 B 說法</span><br>
+          <span class="text-muted">例如：push back → extend the deadline</span>
+        </div>
+        <div class="text-xs text-muted mt-3">
+          這是 Part 3 最常見的陷阱<br>
+          明天會再安排 5 題這個類型給你
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-6 animate-in" style="animation-delay: 0.5s;">
+      <button class="btn-secondary" onclick="showScreen('dashboard')" style="flex:1;">回到首頁</button>
+      <button class="btn-primary" style="flex:1;" onclick="showScreen('quiz')">繼續下一組 →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN: ANALYSIS -->
+<!-- ========================================== -->
+<div class="screen" id="screen-analysis">
+  <div class="container">
+
+    <h2 class="text-2xl mt-4 mb-6">學習分析</h2>
+
+    <div class="card">
+      <div class="section-header" style="margin-bottom: 8px;">
+        <h3>分數趨勢</h3>
+      </div>
+      <div class="chart-placeholder">
+        <svg viewBox="0 0 300 120" style="width:90%; height: 85%;">
+          <line x1="20" y1="110" x2="280" y2="110" stroke="var(--border)" stroke-width="0.5"/>
+          <line x1="20" y1="10" x2="280" y2="10" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+          <text x="0" y="14" fill="var(--text-muted)" font-size="8">800</text>
+          <text x="0" y="112" fill="var(--text-muted)" font-size="8">615</text>
+          <!-- actual line -->
+          <path d="M 30 100 C 60 90, 100 75, 140 60" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- predicted line -->
+          <path d="M 140 60 C 180 45, 220 30, 270 12" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-dasharray="6"/>
+          <circle cx="30" cy="100" r="3" fill="var(--primary)"/>
+          <circle cx="140" cy="60" r="4" fill="var(--primary)"/>
+          <circle cx="270" cy="12" r="3" fill="var(--success)"/>
+          <text x="25" y="96" fill="var(--text-muted)" font-size="7">615</text>
+          <text x="130" y="55" fill="var(--primary)" font-size="8" font-weight="600">648</text>
+          <text x="258" y="26" fill="var(--success)" font-size="7">800</text>
+          <text x="50" y="125" fill="var(--text-muted)" font-size="7">W1</text>
+          <text x="100" y="125" fill="var(--text-muted)" font-size="7">W2</text>
+          <text x="150" y="125" fill="var(--text-muted)" font-size="7">W3</text>
+          <text x="210" y="125" fill="var(--text-muted)" font-size="7">...</text>
+          <text x="250" y="125" fill="var(--text-muted)" font-size="7">W9</text>
+        </svg>
+      </div>
+      <div class="text-sm text-center mt-2">
+        預計第 52 天達標 · <span class="text-success">比上週預測快了 3 天</span>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="section-header" style="margin-bottom: 12px;">
+        <h3>各項能力變化</h3>
+      </div>
+      <div style="font-size: 13px;">
+        <div class="flex justify-between items-center" style="padding: 8px 0; border-bottom: 1px solid var(--border-light);">
+          <span style="width: 120px;">聽力 Part 1</span>
+          <span class="text-muted" style="width: 40px;">82%</span>
+          <span style="width: 10px;">→</span>
+          <span style="width: 40px;">85%</span>
+          <span class="text-success" style="width: 35px;">+3</span>
+          <span class="text-faint text-xs" style="width: 80px; text-align: right;">維持就好</span>
+        </div>
+        <div class="flex justify-between items-center" style="padding: 8px 0; border-bottom: 1px solid var(--border-light);">
+          <span style="width: 120px;">聽力 Part 3</span>
+          <span class="text-muted" style="width: 40px;">38%</span>
+          <span style="width: 10px;">→</span>
+          <span class="font-semibold" style="width: 40px;">51%</span>
+          <span class="text-success font-semibold" style="width: 35px;">+13</span>
+          <span class="text-xs" style="width: 80px; text-align: right; color: var(--success);">最大進步 🔥</span>
+        </div>
+        <div class="flex justify-between items-center" style="padding: 8px 0; border-bottom: 1px solid var(--border-light);">
+          <span style="width: 120px;">文法 Part 5</span>
+          <span class="text-muted" style="width: 40px;">55%</span>
+          <span style="width: 10px;">→</span>
+          <span class="font-semibold" style="width: 40px;">72%</span>
+          <span class="text-success font-semibold" style="width: 35px;">+17</span>
+          <span class="text-xs" style="width: 80px; text-align: right; color: var(--success);">最大進步 🔥</span>
+        </div>
+        <div class="flex justify-between items-center" style="padding: 8px 0;">
+          <span style="width: 120px;">閱讀 Part 7</span>
+          <span class="text-muted" style="width: 40px;">58%</span>
+          <span style="width: 10px;">→</span>
+          <span style="width: 40px;">63%</span>
+          <span class="text-success" style="width: 35px;">+5</span>
+          <span class="text-faint text-xs" style="width: 80px; text-align: right;">下週加強</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-4" style="padding: 16px 20px;">
+      <div class="flex justify-between text-sm" style="padding: 6px 0;">
+        <span class="text-muted">累計學習天數</span><span class="font-semibold">22 天</span>
+      </div>
+      <div class="flex justify-between text-sm" style="padding: 6px 0;">
+        <span class="text-muted">累計做題數</span><span class="font-semibold">1,847 題</span>
+      </div>
+      <div class="flex justify-between text-sm" style="padding: 6px 0;">
+        <span class="text-muted">總學習時間</span><span class="font-semibold">18 小時 35 分</span>
+      </div>
+      <div class="flex justify-between text-sm" style="padding: 6px 0;">
+        <span class="text-muted">平均每天</span><span class="font-semibold">51 分鐘</span>
+      </div>
+    </div>
+
+    <div class="ai-report mt-4">
+      <h4>📊 AI 週報</h4>
+      <p></p>
+      <h4>本週最大突破</h4>
+      <p>文法時態題掌握度從 55% → 72%，已接近目標水準。</p>
+      <h4>下週建議</h4>
+      <p>閱讀 Part 7 是目前提分空間最大的區域，特別是「雙篇閱讀」的交叉比對題型。建議每天多花 15 分鐘。</p>
+      <div class="alert-card" style="margin-top: 8px;">
+        <strong>⚠️ 風險提醒</strong><br>
+        <span class="text-sm">聽力 Part 2 掌握度這週沒有提升，如果持續停滯可能影響達標時間。</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="inner">
+      <button class="tab" onclick="showScreen('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        首頁
+      </button>
+      <button class="tab active" onclick="showScreen('analysis')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        分析
+      </button>
+      <button class="tab" onclick="showScreen('quiz')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        模考
+      </button>
+      <button class="tab" onclick="showScreen('mistakes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        錯題
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN: MISTAKES -->
+<!-- ========================================== -->
+<div class="screen" id="screen-mistakes">
+  <div class="container">
+
+    <h2 class="text-2xl mt-4 mb-4">錯題本</h2>
+
+    <div class="filter-tabs">
+      <button class="filter-tab active">全部 (86)</button>
+      <button class="filter-tab">待複習 (23)</button>
+      <button class="filter-tab">已掌握 (41)</button>
+    </div>
+
+    <div class="section-header">
+      <h3>依錯誤模式分類</h3>
+    </div>
+
+    <div class="card" style="padding: 0;">
+      <div class="mistake-group">
+        <div class="group-header">
+          <div>
+            <h4>時態混淆（18 題）</h4>
+            <div class="desc">最常搞混：現在完成式 vs 過去式</div>
+            <div class="mt-1">
+              <div class="progress-track" style="width: 120px;">
+                <div class="progress-fill" style="width: 55%;"></div>
+              </div>
+              <span class="text-xs text-muted">掌握度 55%</span>
+            </div>
+          </div>
+          <button class="practice-btn">集中練習 →</button>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border-light);"></div>
+      <div class="mistake-group">
+        <div class="group-header">
+          <div>
+            <h4>語意轉換（12 題）</h4>
+            <div class="desc">對話用 A 說法，選項換成 B 說法</div>
+            <div class="mt-1">
+              <div class="progress-track" style="width: 120px;">
+                <div class="progress-fill" style="width: 42%;"></div>
+              </div>
+              <span class="text-xs text-muted">掌握度 42%</span>
+            </div>
+          </div>
+          <button class="practice-btn">集中練習 →</button>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border-light);"></div>
+      <div class="mistake-group">
+        <div class="group-header">
+          <div>
+            <h4>介系詞搭配（9 題）</h4>
+            <div class="desc">常錯：in/on/at 的時間用法</div>
+            <div class="mt-1">
+              <div class="progress-track" style="width: 120px;">
+                <div class="progress-fill" style="width: 61%;"></div>
+              </div>
+              <span class="text-xs text-muted">掌握度 61%</span>
+            </div>
+          </div>
+          <button class="practice-btn">集中練習 →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cram-card mt-6">
+      <div class="star">⭐</div>
+      <h3>考前 3 天複習包</h3>
+      <p>系統從你的錯題中挑出 30 題<br>這些是你「最可能再錯」的題<br>考前刷一遍，預估多拿 15-25 分</p>
+      <button class="btn-primary mt-4" style="max-width: 240px; margin: 16px auto 0;">開始複習 →</button>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="inner">
+      <button class="tab" onclick="showScreen('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        首頁
+      </button>
+      <button class="tab" onclick="showScreen('analysis')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        分析
+      </button>
+      <button class="tab" onclick="showScreen('quiz')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        模考
+      </button>
+      <button class="tab active" onclick="showScreen('mistakes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        錯題
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN: ADMIN (補習班) -->
+<!-- ========================================== -->
+<div class="screen" id="screen-admin">
+  <div class="container-wide">
+
+    <div class="flex items-center justify-between mt-4 mb-6">
+      <div>
+        <div class="text-2xl">管理後台</div>
+        <div class="text-sm text-muted">XX 英語補習班</div>
+      </div>
+    </div>
+
+    <div class="admin-stats">
+      <div class="card admin-stat">
+        <div class="num">87</div>
+        <div class="label">學生總數</div>
+      </div>
+      <div class="card admin-stat">
+        <div class="num">64</div>
+        <div class="label">今日活躍 (74%)</div>
+      </div>
+      <div class="card admin-stat">
+        <div class="num">682</div>
+        <div class="label">平均預估分數</div>
+      </div>
+      <div class="card admin-stat">
+        <div class="num text-success">+38</div>
+        <div class="label">本月提升</div>
+      </div>
+    </div>
+
+    <div class="card mt-6">
+      <div class="section-header">
+        <h3>⚠️ 需要關注</h3>
+      </div>
+
+      <div class="alert-card danger" style="margin-bottom: 12px;">
+        <strong>🔴 3 位學生超過 5 天沒登入</strong><br>
+        <span class="text-sm">王大偉（7天）李小華（6天）陳美玲（5天）</span>
+        <div class="mt-2">
+          <button class="btn-secondary" style="width: auto; display: inline-block; padding: 6px 14px; font-size: 13px;">發提醒通知 →</button>
+        </div>
+      </div>
+
+      <div class="alert-card">
+        <strong>🟡 2 位學生進度落後預期</strong><br>
+        <span class="text-sm">張小明 預期 680 / 實際 640（落後 40 分）<br>林小美 預期 720 / 實際 695（落後 25 分）</span>
+        <div class="mt-2">
+          <button class="btn-secondary" style="width: auto; display: inline-block; padding: 6px 14px; font-size: 13px;">查看詳情 →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-6">
+      <div class="section-header">
+        <h3>多益衝刺 A 班</h3>
+        <div class="extra">18 人 · 平均 695 分</div>
+      </div>
+
+      <div class="student-row" style="font-size: 12px; color: var(--text-muted); border-bottom: 1px solid var(--border);">
+        <span class="student-name">姓名</span>
+        <span class="student-score">預估</span>
+        <span style="width:40px;">目標</span>
+        <span class="student-trend">本週</span>
+        <span class="student-status">狀態</span>
+      </div>
+      <div class="student-row">
+        <span class="student-name">陳小安</span>
+        <span class="student-score">745</span>
+        <span style="width:40px;">750</span>
+        <span class="student-trend text-success">+18↑</span>
+        <span class="student-status"><span class="badge badge-success">快達標</span></span>
+      </div>
+      <div class="student-row">
+        <span class="student-name">王小明</span>
+        <span class="student-score">720</span>
+        <span style="width:40px;">800</span>
+        <span class="student-trend text-success">+12↑</span>
+        <span class="student-status"><span class="badge badge-success">正常</span></span>
+      </div>
+      <div class="student-row">
+        <span class="student-name">張小偉</span>
+        <span class="student-score">640</span>
+        <span style="width:40px;">700</span>
+        <span class="student-trend text-warning">+2↑</span>
+        <span class="student-status"><span class="badge badge-warning">偏慢</span></span>
+      </div>
+      <div class="student-row">
+        <span class="student-name">林小美</span>
+        <span class="student-score">695</span>
+        <span style="width:40px;">800</span>
+        <span class="student-trend text-danger">-3↓</span>
+        <span class="student-status"><span class="badge badge-danger">退步</span></span>
+      </div>
+      <div class="student-row">
+        <span class="student-name">趙大文</span>
+        <span class="student-score">580</span>
+        <span style="width:40px;">700</span>
+        <span class="student-trend text-faint">──</span>
+        <span class="student-status"><span class="badge badge-danger">未登入</span></span>
+      </div>
+
+      <div class="flex gap-3 mt-4">
+        <button class="btn-secondary" style="flex:1; font-size: 14px; padding: 10px;">派作業給全班</button>
+        <button class="btn-secondary" style="flex:1; font-size: 14px; padding: 10px;">匯出家長報告</button>
+      </div>
+    </div>
+
+    <!-- 招生工具 -->
+    <div class="card mt-6">
+      <div class="section-header">
+        <h3>招生工具</h3>
+      </div>
+
+      <div style="padding: 16px; background: var(--primary-light); border-radius: 12px;">
+        <div class="text-sm font-semibold mb-2">你的專屬診斷連結</div>
+        <div style="padding: 10px 14px; background: var(--card); border-radius: 8px; font-size: 13px; font-family: monospace; border: 1px solid var(--border);">
+          scoremap.tw/d/xx-english
+        </div>
+        <div class="flex gap-3 mt-3">
+          <button class="btn-secondary" style="flex:1; font-size: 13px; padding: 8px;">複製連結</button>
+          <button class="btn-secondary" style="flex:1; font-size: 13px; padding: 8px;">產生 QR Code</button>
+        </div>
+      </div>
+
+      <div class="mt-4 text-sm">
+        <div class="section-header" style="margin-bottom: 8px;">
+          <span class="font-semibold">轉換漏斗 · 本月</span>
+        </div>
+        <div class="flex justify-between items-center" style="padding: 6px 0;">
+          <span>開始測驗</span>
+          <div class="flex items-center gap-3">
+            <div class="progress-track" style="width: 100px;">
+              <div class="progress-fill" style="width: 100%;"></div>
+            </div>
+            <span style="width: 50px; text-align: right;">142 人</span>
+          </div>
+        </div>
+        <div class="flex justify-between items-center" style="padding: 6px 0;">
+          <span>完成測驗</span>
+          <div class="flex items-center gap-3">
+            <div class="progress-track" style="width: 100px;">
+              <div class="progress-fill" style="width: 69%;"></div>
+            </div>
+            <span style="width: 50px; text-align: right;">98 人</span>
+          </div>
+        </div>
+        <div class="flex justify-between items-center" style="padding: 6px 0;">
+          <span>留聯絡方式</span>
+          <div class="flex items-center gap-3">
+            <div class="progress-track" style="width: 100px;">
+              <div class="progress-fill" style="width: 47%;"></div>
+            </div>
+            <span style="width: 50px; text-align: right;">67 人</span>
+          </div>
+        </div>
+        <div class="flex justify-between items-center" style="padding: 6px 0;">
+          <span>報名</span>
+          <div class="flex items-center gap-3">
+            <div class="progress-track" style="width: 100px;">
+              <div class="progress-fill" style="width: 6%;"></div>
+            </div>
+            <span style="width: 50px; text-align: right;">8 人</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN: PRICING -->
+<!-- ========================================== -->
+<div class="screen" id="screen-pricing">
+  <div class="container">
+
+    <div class="text-center mt-6 mb-6">
+      <h2 class="text-2xl">選擇方案</h2>
+      <p class="text-sm text-muted mt-1">根據你的狀態推薦</p>
+    </div>
+
+    <div style="padding: 12px 16px; background: var(--primary-light); border-radius: 12px; margin-bottom: 20px;">
+      <div class="text-sm">
+        <span class="text-primary font-semibold">💡 推薦給你：衝刺方案</span><br>
+        <span class="text-muted">你的考試在 58 天後，差距 152 分，衝刺方案最適合</span>
+      </div>
+    </div>
+
+    <div class="pricing-grid">
+
+      <div class="card pricing-card">
+        <div class="text-center">
+          <div class="text-lg">免費</div>
+          <div class="price">NT$ 0</div>
+        </div>
+        <ul class="features">
+          <li>診斷測驗</li>
+          <li>每日 5 題練習</li>
+          <li>基本分析</li>
+        </ul>
+        <button class="btn-secondary">目前方案</button>
+      </div>
+
+      <div class="card pricing-card featured">
+        <div class="badge-featured">推薦</div>
+        <div class="text-center" style="padding-top: 8px;">
+          <div class="text-lg">衝刺方案</div>
+          <div class="price">NT$ 399<span class="period"> / 月</span></div>
+        </div>
+        <ul class="features">
+          <li>無限做題</li>
+          <li>每日個人化計畫</li>
+          <li>模考 × 3</li>
+          <li>錯題本 + AI 解析</li>
+          <li>分數預測</li>
+        </ul>
+        <button class="btn-primary">免費試用 7 天 →</button>
+      </div>
+
+      <div class="card pricing-card">
+        <div class="text-center">
+          <div class="text-lg">保證班</div>
+          <div class="price">NT$ 2,999<span class="period"> 一次付</span></div>
+        </div>
+        <ul class="features">
+          <li>衝刺方案全部功能</li>
+          <li>AI 口說批改</li>
+          <li>AI 寫作批改</li>
+          <li>無限模考</li>
+          <li>沒達標分數 → 全額退費</li>
+        </ul>
+        <button class="btn-primary" style="background: var(--text);">立即開始 →</button>
+      </div>
+
+    </div>
+
+    <div class="text-center mt-6 mb-6">
+      <div class="text-xs text-muted">7 天免費試用，隨時取消，不綁約</div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+// ===== SCREEN NAVIGATION =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+
+  document.querySelectorAll('.page-nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page-nav button').forEach(b => {
+    if (b.textContent.toLowerCase().includes(id) ||
+        (id === 'landing' && b.textContent === 'Landing') ||
+        (id === 'diagnosis' && b.textContent === '診斷測驗') ||
+        (id === 'report' && b.textContent === '診斷報告') ||
+        (id === 'dashboard' && b.textContent === 'Dashboard') ||
+        (id === 'quiz' && b.textContent === '做題') ||
+        (id === 'result' && b.textContent === '做完題') ||
+        (id === 'analysis' && b.textContent === '分析') ||
+        (id === 'mistakes' && b.textContent === '錯題本') ||
+        (id === 'admin' && b.textContent === '補習班') ||
+        (id === 'pricing' && b.textContent === '方案')
+    ) {
+      b.classList.add('active');
+    }
+  });
+
+  // Animate mastery bar on result screen
+  if (id === 'result') {
+    setTimeout(() => {
+      document.getElementById('masteryBar').style.width = '51%';
+    }, 300);
+  }
+
+  window.scrollTo(0, 0);
+}
+
+// ===== DARK MODE =====
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  const btn = document.getElementById('themeBtn');
+  btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+}
+
+// Auto dark mode based on time
+if (new Date().getHours() >= 19 || new Date().getHours() < 7) {
+  document.body.classList.add('dark');
+  document.getElementById('themeBtn').textContent = '☀️';
+}
+
+// ===== QUIZ OPTION SELECT =====
+function selectOption(el) {
+  el.parentElement.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+
+</body>
+</html>
